@@ -16,7 +16,7 @@ pipeline {
 		GITLAB_APP_URL = "https://github.com/Manuel-1996/ArredoBimboE-Commerce.git" 
  
 
-		GITLAB_CRED = "token_github"
+		GITLAB_CRED = "utenza-tecnica-github"
      
 
 	}
@@ -28,8 +28,7 @@ pipeline {
 				dir("app") {
 					script {
 						//sh "git clone https://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@github.com/Manuel-1996/ArredoBimboE-Commerce.git"
-						git url: "${GITLAB_APP_URL}",
-                            credentialsId: "${GITLAB_CRED}"
+						git url: "${GITLAB_APP_URL}",credentialsId: "${GITLAB_CRED}"
 				}
 			}
 		}
