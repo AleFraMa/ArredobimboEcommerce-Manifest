@@ -28,7 +28,7 @@ pipeline {
 			steps {
 				dir("app") {
 					script {
-						sh "git clone https://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@github.com/Manuel-1996/ArredoBimboE-Commerce.git"
+						sh "git clone https://github.com/Manuel-1996/ArredoBimboE-Commerce.git"
 						//git url: "${GITLAB_APP_URL}",credentialsId: "${GITLAB_CRED}"
 				}
 			}
