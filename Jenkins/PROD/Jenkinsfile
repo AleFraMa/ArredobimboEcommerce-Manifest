@@ -59,11 +59,6 @@ pipeline {
 					script {
 						sh "git clone https://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@github.com/Manuel-1996/ArredoBimboE-Commerce.git"
 				}
-				dir("manifest") {
-					script {
-						sh "echo manifest"
-					}
-				}
 			}
 		}
 		}
