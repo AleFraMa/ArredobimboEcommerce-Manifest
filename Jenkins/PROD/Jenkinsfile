@@ -16,7 +16,8 @@ pipeline {
 		GITLAB_APP_URL = "https://github.com/Manuel-1996/ArredoBimboE-Commerce.git" 
  
 
-		GITLAB_CRED = "token_github"
+		//GITLAB_CRED = "token_github"
+		GITLAB_CRED = "utenza-tecnica-github"
      
 
 	}
