@@ -1,0 +1,128 @@
+
+pipeline {
+	agent any
+	
+
+	parameters {	
+
+	}
+	
+	environment {
+		kubeEndpoint = utilsLibrary.getSysUatEndpoint('PROD') //https://c115-e.eu-de.containers.cloud.ibm.com:32292
+		kubeUser = utilsLibrary.getSysUatUser('PROD') //openshift-prod
+		app = "-"
+		VERSION  = '-'
+		ARTIFACT = '-'
+		BUILD_NO  = "${env.BUILD_NUMBER}"
+		merge_iid = '-'
+		deploy_status = 200
+        ACR_NAME_OC = 'image-registry.openshift-image-registry.svc:5000'
+		ACR_NAME = utilsLibrary.getSysUatAcrName('PROD') //image-registry-openshift-image-registry.fra02-04-prod-cb-cd04c695f3ed82958a5c72bc112c339f-0000.eu-de.containers.appdomain.cloud
+		ACR_URL  = utilsLibrary.getSysUatAcrUrl('PROD')  //image-registry-openshift-image-registry.fra02-04-prod-cb-cd04c695f3ed82958a5c72bc112c339f-0000.eu-de.containers.appdomain.cloud
+		ACR_QU_NAME = utilsLibrary.getSysUatAcrName('UAT') //image-registry-openshift-image-registry.fra02-sys-uat-cb-cd04c695f3ed82958a5c72bc112c339f-0000.eu-de.containers.appdomain.cloud
+		ACR_QU_URL  = utilsLibrary.getSysUatAcrUrl('UAT')  //image-registry-openshift-image-registry.fra02-sys-uat-cb-cd04c695f3ed82958a5c72bc112c339f-0000.eu-de.containers.appdomain.cloud
+		
+        GITLAB_CRED = "utenza-tecnica"
+
+        GITLAB_API_URL   = "https://api.github.com/" 
+				
+        
+		  
+	
+		API_TOKEN = "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" 
+
+		
+
+        PROD_BRANCH = "master"
+		
+			BODY = '{ \
+				"head": "<SCR_BRANCH>", \
+				"base": "<DST_BRANCH>", \
+				"title": "Deploy to Prod: <VERSION_TAG>" \
+			}'
+			
+		artifact_lower=''
+
+		// DA MODIFICARE
+		JOB_URL = 'https://jenkins.chebanca.it/job/Orchestration/job/PROD/job/Deployment/job/CB-Orch-Configuration-PROD/'  
+		ACR_CRED = "acr-prod-orchestration"
+		NAMESPACE = 'prod-orchestration'  
+		NAMESPACE_UAT ="uat-orchestration"
+		DEPLOYFILE='AKS/PROD/Deployment/configuration-deploy-PROD.yaml' 
+		ACR_QU_CRED = "acr-uat-orchestration" 
+		GITLAB_APP_URL = "https://github.com/iriscubereply/CB-Orch-Configuration-Service.git" 
+		GITLAB_MAN_URL = "https://github.com/iriscubereply/CB-Orch-Configuration-Manifest.git" 
+		OWNER="iriscubereply/CB-Orch-Configuration-Service"
+		
+     
+
+	}
+	
+
+	stages {
+		stage('Git Pull') {
+			steps {
+				dir("app") {
+					script {
+						sh "git clone https://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@github.com/Manuel-1996/ArredoBimboE-Commerce.git"
+				}
+				dir("manifest") {
+					script {
+						sh "echo manifest"
+					}
+				}
+			}
+		}
+
+		stage('Install Dependacy') {
+
+			steps {
+				dir("app/ArredoBimboE-Commerce"){
+				script {
+					sh 'echo "export const IP = "https://arredobimbo.com:8443";" > ./src/configs/IPConfig.js'
+					sh "npm install"
+				}
+				}
+			}
+		}
+		
+		stage('Build Application') {
+			steps {
+				dir("app/ArredoBimboE-Commerce") {
+					script {
+						sh "npm run build"
+					}
+				}
+			}
+		}
+		stage('Remove Old site') {
+			steps {
+				dir("app/ArredoBimboE-Commerce") {
+					script {
+						sh "echo dafare"
+					}
+				}
+			}
+		}
+
+		stage('Deploy On server Alibaba') {
+			steps {
+				script {
+					dir ("app/ArredoBimboE-Commerce") {
+							sh "sudo scp -i /root/Progetti/ArredoBimbo/chiave_privata_server_arredobimbo/key.pem -r ./build/* root@arredobimbo.com:/usr/share/nginx/html"
+					}	
+				}
+			}
+		}
+		
+	
+	
+		
+
+
+	post {	
+		always {
+			deleteDir()
+		}
+	}
+}

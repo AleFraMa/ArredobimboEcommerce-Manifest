@@ -1,0 +1,256 @@
+@Library('sdlc-library')_
+
+pipeline {
+    agent any
+
+    tools {
+        maven 'M363' // Maven 3.6.3
+        jdk 'JDK11'  // Java 11
+    }
+
+    parameters {
+        booleanParam(name: 'executeUnitTests', defaultValue: true, description: 'True if you want to execute unit tests')
+        booleanParam(name: 'executeSonarQube', defaultValue: true, description: 'True if you want to execute SonarQube analysis')
+        booleanParam(name: 'executeDependencyCheck', defaultValue: true, description: 'True if you want to execute OWASP Dependency-Check')
+        booleanParam(name: 'checkDockerImage', defaultValue: true, description: 'True if you want to check Docker Image for known vulnerabilities')
+        booleanParam(name: 'enableQualityGates', defaultValue: true, description: 'True if you want to enable all quality gates') 
+        /*booleanParam(name: 'deployService', defaultValue: 'false', description: 'Deploy of service inside AKS/CERT/Service/sec-stsoncloud-svc-CERT.yaml')
+        booleanParam(name: 'deployConfigMap', defaultValue: 'false', description: 'Deploy of ConfigMap inside AKS/SVIL/ConfigMap/sec-stsoncloud-cm-CERT.yaml')*/
+    }
+
+    environment {
+        kubeEndpoint = utilsLibrary.getSysUatEndpoint('SYS')
+        kubeUser = utilsLibrary.getSysUatUser('SYS')
+
+        NEXUS_CRED = 'nexus-admin'
+
+        //url for pull image
+        ACR_NAME_OC = 'image-registry.openshift-image-registry.svc:5000'
+        //url for push image
+        ACR_NAME = 'image-registry-openshift-image-registry.fra02-sys-uat-cb-cd04c695f3ed82958a5c72bc112c339f-0000.eu-de.containers.appdomain.cloud'
+        ACR_CRED = 'acr-sys-orchestration'
+
+        //namespace OPC
+        NAMESPACE = 'sys-orchestration'
+
+        GITLAB_APP_URL = 'https://github.com/iriscubereply/CB-Orch-Configuration-Service.git'
+        GITLAB_MAN_URL = 'https://github.com/iriscubereply/CB-Orch-Configuration-Manifest.git'
+        GITLAB_CRED = 'utenza-tecnica'
+    //SOURCE_BRANCH = "dev"
+    }
+
+    stages {
+        stage('Git Clone') {
+            steps {
+                dir('app') {
+                    script {
+                        git url: "${GITLAB_APP_URL}",
+                            branch: "${SOURCE_BRANCH}",
+                            credentialsId: "${GITLAB_CRED}"
+
+                            pom = readMavenPom file: 'pom.xml'
+                            VERSION = "${pom.version}"
+                            ARTIFACT = "${pom.artifactId}"
+                            GROUP = "${pom.groupId}"
+                            LOCAL_REPO = GROUP.replaceAll('\\.', '/')
+                    }
+                }
+                dir('manifest') {
+                    script {
+                        git url: "${GITLAB_MAN_URL}",
+                            credentialsId: "${GITLAB_CRED}"
+                    }
+                }
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                dir('app') {
+                    script {
+                        def jacocoPrepareAgent = ''
+                        def jacocoReport = ''
+                        if (params.executeUnitTests) {
+                            jacocoPrepareAgent = 'org.jacoco:jacoco-maven-plugin:prepare-agent'
+                            jacocoReport = 'org.jacoco:jacoco-maven-plugin:report -DdataFile=target/jacoco.exec'
+                        }
+                        sh "mvn -B clean ${jacocoPrepareAgent} install ${jacocoReport} -DskipTests=${!params.executeUnitTests}"
+                        if (params.executeUnitTests) {
+                            archiveArtifacts artifacts: 'target/surefire-reports/**/*.txt', allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'target/surefire-reports/**/*.xml', allowEmptyArchive: true
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('SonarQube analysis') {
+            when {
+                expression {
+                    return params.executeSonarQube
+                }
+            }
+            steps {
+                dir('app') {
+                    withSonarQubeEnv('SonarCB') {
+                        sh 'mvn sonar:sonar -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true'
+                    }
+                }
+            }
+        }
+
+        stage('SonarQube Quality Gate') {
+            when {
+                expression {
+                    return params.enableQualityGates && params.executeSonarQube
+                }
+            }
+            steps {
+                dir('app') {
+                    sh 'sleep 10'
+                    timeout(time: 10, unit: 'MINUTES') {
+                        waitForQualityGate abortPipeline: true
+                    }
+                }
+            }
+        }
+
+        stage('OWASP Dependency-Check execution') {
+            when {
+                expression {
+                    return params.executeDependencyCheck
+                }
+            }
+            steps {
+                dir('app') {
+                    script {
+                        echo 'OWASP Dependency-Check execution'
+                        dependencyCheck additionalArguments: ' -o "./target/" -s "./" -f "XML" -f "HTML" ', odcInstallation: 'OWASP-Dependency-Check'
+                        if (params.enableQualityGates) {
+                            dependencyCheckPublisher (
+                                pattern: "target/dependency-check-report.xml",
+                                failedTotalHigh: 1,
+                                failedTotalCritical: 1
+                            )
+                        } else {
+                            dependencyCheckPublisher (
+                                pattern: "target/dependency-check-report.xml",
+                            )
+                        }
+                        archiveArtifacts artifacts: 'target/dependency-check-report.html'
+                    }
+                }
+            }
+        }
+
+        stage('DependencyCheck Quality Gate') {
+            when {
+                expression {
+                    return params.enableQualityGates && params.executeDependencyCheck
+                }
+            }
+            steps {
+                dir('app') {
+                    script {
+                        if (currentBuild.result == 'FAILURE') {
+                            error('Dependency Check Quality Gate: found at least 1 Critical or High finding')
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Check Docker Image via Trivy') {
+            when {
+                expression {
+                    return params.checkDockerImage;
+                }
+            }
+            steps {
+                dir("app") {
+                    script {
+                        echo "Check Docker Image for known vulnerabilities"
+                        sh "/usr/local/bin/trivy -o 'target/trivy-report.txt' `grep 'FROM' Dockerfile | cut -d' ' -f2`"
+                        archiveArtifacts artifacts: 'target/trivy-report.txt'
+                    }
+                }
+            }
+        }
+
+        stage('Trivy Quality Gate') {
+            when {
+                expression {
+                    return params.enableQualityGates && params.checkDockerImage
+                }
+            }
+            steps {
+                dir('app') {
+                    script {
+                        def file = readFile("target/trivy-report.txt")
+                        if (file.size() != 0 && (file.contains("CRITICAL") || file.contains("HIGH"))) {
+                            error('Trivy Quality Gate: found at least 1 Critical or High Vulnerability in one docker image')
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Archive Application') {
+            steps {
+                dir('app') {
+                    sh 'mvn -B package -DskipTests=true'
+                }
+            }
+        }
+
+        stage('Push on Nexus') {
+            steps {
+                dir('app') {
+                    script {
+                        NEXUS_SNAP_URL = "https://nexus.chebanca.it/repository/maven-snapshots/${LOCAL_REPO}/${ARTIFACT}/${VERSION}/"
+                        utilsLibrary.pushOnNexusInsecure(NEXUS_CRED, "target/${ARTIFACT}-${VERSION}.jar", NEXUS_SNAP_URL)
+                    }
+                }
+            }
+        }
+
+        stage('Build, Push & Remove Image') {
+            steps {
+                dir('app') {
+                    script {
+                        sh "sed -i 's/<VERSION>/${VERSION}/'  Dockerfile"
+                        def artifact_lower = ARTIFACT.toLowerCase()
+                        utilsLibrary.buildAndPushOpenshift(ACR_NAME, NAMESPACE, ACR_CRED, "${artifact_lower}", VERSION, "--build-arg JAR_FILE=target/${artifact_lower}.jar .")
+                        utilsLibrary.removeOpenshiftImage(ACR_NAME, NAMESPACE, ACR_CRED, "${artifact_lower}", VERSION)
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    dir('manifest') {
+                        script {
+                            ENV = "SYS"
+                            def artifact_lower = ARTIFACT.toLowerCase()
+                            sh "sed -i 's/<NAMESPACE>/${NAMESPACE}/'  AKS/SYS/Deployment/configuration-deploy-SYS.yaml"
+                            sh "sed -i 's/<ACR_NAME_OC>/${ACR_NAME_OC}/'  AKS/SYS/Deployment/configuration-deploy-SYS.yaml"
+                            sh "sed -i 's/<ARTIFACT_ID>/${artifact_lower}/'  AKS/SYS/Deployment/configuration-deploy-SYS.yaml"
+                            sh "sed -i 's/<VERSION>/${VERSION}/'  AKS/SYS/Deployment/configuration-deploy-SYS.yaml"
+                            sh "sed -i 's/<BUILD_NUM>/${BUILD_NUMBER}/' AKS/SYS/Deployment/configuration-deploy-SYS.yaml"
+						    sh "sed -i 's/<ENV>/${ENV}/'  AKS/SYS/Deployment/configuration-deploy-SYS.yaml" 
+                            utilsLibrary.deployResourceOc(kubeUser, kubeEndpoint, 'AKS/SYS/Deployment/configuration-deploy-SYS.yaml')
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            deleteDir()
+        }
+    }
+}
