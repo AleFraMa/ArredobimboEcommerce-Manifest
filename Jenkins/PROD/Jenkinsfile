@@ -6,47 +6,17 @@ pipeline {
 	
 	environment {
 	
-		app = "-"
-		VERSION  = '-'
-		ARTIFACT = '-'
-		BUILD_NO  = "${env.BUILD_NUMBER}"
-		merge_iid = '-'
-		deploy_status = 200
-        ACR_NAME_OC = 'image-registry.openshift-image-registry.svc:5000'
 
-		
-        GITLAB_CRED = "utenza-tecnica"
-
-        GITLAB_API_URL   = "https://api.github.com/" 
 				
         
 		  
 	
-		API_TOKEN = "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" 
 
-		
+ 
+		GITLAB_APP_URL = "https://github.com/Manuel-1996/ArredoBimboE-Commerce.git" 
+ 
 
-        PROD_BRANCH = "master"
-		
-			BODY = '{ \
-				"head": "<SCR_BRANCH>", \
-				"base": "<DST_BRANCH>", \
-				"title": "Deploy to Prod: <VERSION_TAG>" \
-			}'
-			
-		artifact_lower=''
-
-		// DA MODIFICARE
-		JOB_URL = 'https://jenkins.chebanca.it/job/Orchestration/job/PROD/job/Deployment/job/CB-Orch-Configuration-PROD/'  
-		ACR_CRED = "acr-prod-orchestration"
-		NAMESPACE = 'prod-orchestration'  
-		NAMESPACE_UAT ="uat-orchestration"
-		DEPLOYFILE='AKS/PROD/Deployment/configuration-deploy-PROD.yaml' 
-		ACR_QU_CRED = "acr-uat-orchestration" 
-		GITLAB_APP_URL = "https://github.com/iriscubereply/CB-Orch-Configuration-Service.git" 
-		GITLAB_MAN_URL = "https://github.com/iriscubereply/CB-Orch-Configuration-Manifest.git" 
-		OWNER="iriscubereply/CB-Orch-Configuration-Service"
-		
+		GITLAB_CRED = "token_github"
      
 
 	}
@@ -57,7 +27,9 @@ pipeline {
 			steps {
 				dir("app") {
 					script {
-						sh "git clone https://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@github.com/Manuel-1996/ArredoBimboE-Commerce.git"
+						//sh "git clone https://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@github.com/Manuel-1996/ArredoBimboE-Commerce.git"
+						git url: "${GITLAB_APP_URL}",
+                            credentialsId: "${GITLAB_CRED}"
 				}
 			}
 		}
