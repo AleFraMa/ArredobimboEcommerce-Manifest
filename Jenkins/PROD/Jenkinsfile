@@ -3,13 +3,9 @@ pipeline {
 	agent any
 	
 
-	parameters {	
-
-	}
 	
 	environment {
-		kubeEndpoint = utilsLibrary.getSysUatEndpoint('PROD') //https://c115-e.eu-de.containers.cloud.ibm.com:32292
-		kubeUser = utilsLibrary.getSysUatUser('PROD') //openshift-prod
+	
 		app = "-"
 		VERSION  = '-'
 		ARTIFACT = '-'
@@ -17,10 +13,7 @@ pipeline {
 		merge_iid = '-'
 		deploy_status = 200
         ACR_NAME_OC = 'image-registry.openshift-image-registry.svc:5000'
-		ACR_NAME = utilsLibrary.getSysUatAcrName('PROD') //image-registry-openshift-image-registry.fra02-04-prod-cb-cd04c695f3ed82958a5c72bc112c339f-0000.eu-de.containers.appdomain.cloud
-		ACR_URL  = utilsLibrary.getSysUatAcrUrl('PROD')  //image-registry-openshift-image-registry.fra02-04-prod-cb-cd04c695f3ed82958a5c72bc112c339f-0000.eu-de.containers.appdomain.cloud
-		ACR_QU_NAME = utilsLibrary.getSysUatAcrName('UAT') //image-registry-openshift-image-registry.fra02-sys-uat-cb-cd04c695f3ed82958a5c72bc112c339f-0000.eu-de.containers.appdomain.cloud
-		ACR_QU_URL  = utilsLibrary.getSysUatAcrUrl('UAT')  //image-registry-openshift-image-registry.fra02-sys-uat-cb-cd04c695f3ed82958a5c72bc112c339f-0000.eu-de.containers.appdomain.cloud
+
 		
         GITLAB_CRED = "utenza-tecnica"
 
