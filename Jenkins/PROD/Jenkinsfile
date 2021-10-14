@@ -28,8 +28,8 @@ pipeline {
 			steps {
 				dir("app") {
 					script {
-						//sh "git clone https://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@github.com/Manuel-1996/ArredoBimboE-Commerce.git"
-						git url: "${GITLAB_APP_URL}",credentialsId: "${GITLAB_CRED}"
+						sh "git clone https://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@github.com/Manuel-1996/ArredoBimboE-Commerce.git"
+						//git url: "${GITLAB_APP_URL}",credentialsId: "${GITLAB_CRED}"
 				}
 			}
 		}
