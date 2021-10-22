@@ -20,7 +20,7 @@ pipeline {
 		GITLAB_CRED = "utenza-tecnica-github"
 		GITHUB_PROVVISORIA= "utenza-ale-blue"
      
-			//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
+			//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
 	}
 	
 
@@ -29,7 +29,7 @@ pipeline {
 			steps {
 				dir("app") {
 					script {
-						git clone https://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@github.com/Manuel-1996/ArredoBimboE-Commerce.git
+						//git clone https://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@github.com/Manuel-1996/ArredoBimboE-Commerce.git
 
 						//sh "git clone https://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@github.com/Manuel-1996/ArredoBimboE-Commerce.git"
 						git url: "${GITLAB_APP_URL}",credentialsId: "${GITHUB_PROVVISORIA}"
