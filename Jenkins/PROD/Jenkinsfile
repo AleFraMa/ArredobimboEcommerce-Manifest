@@ -77,7 +77,7 @@ pipeline {
 				script {
 					dir ("app") {
 							sh "ls"
-							//sh "sudo scp -i /root/Progetti/ArredoBimbo/chiave_privata_server_arredobimbo/key.pem -r ./build/* root@arredobimbo.com:/usr/share/nginx/html"
+							sh "sudo scp -i /root/Progetti/ArredoBimbo/chiave_privata_server_arredobimbo/key.pem -r ./build/* root@arredobimbo.com:/usr/share/nginx/html"
 					}	
 				}
 			}
