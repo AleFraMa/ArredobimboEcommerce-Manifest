@@ -33,7 +33,7 @@ pipeline {
 		stage('Git Pull') {
 		 when {
             expression {
-                    return !params.executeSonarQube;
+                    return !params.testonlydeploy;
                 }
         }
 			steps {
@@ -48,7 +48,7 @@ pipeline {
 		stage('Install Dependacy') {
 					 when {
             expression {
-                    return !params.executeSonarQube;
+                    return !params.testonlydeploy;
                 }
         }
 
@@ -68,7 +68,7 @@ pipeline {
 		stage('Build Application') {
 					 when {
             expression {
-                    return !params.executeSonarQube;
+                    return !params.testonlydeploy;
                 }
         }
 			steps {
@@ -83,7 +83,7 @@ pipeline {
 		stage('Remove Old site') {
 					 when {
             expression {
-                    return !params.executeSonarQube;
+                    return !params.testonlydeploy;
                 }
         }
 			steps {
@@ -96,6 +96,11 @@ pipeline {
 		}
 
 		stage('Deploy On server Alibaba') {
+								 when {
+            expression {
+                    return params.testonlydeploy;
+                }
+        }
 			steps {
 				script {
 					dir ("app") {
