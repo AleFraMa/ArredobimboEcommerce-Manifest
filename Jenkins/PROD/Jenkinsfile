@@ -108,7 +108,7 @@ pipeline {
 							sh "echo newprova >> prova2.txt"
 							 withCredentials([string(credentialsId: "password-ssh-arredobimbo-server", variable: 'password')]) {
 
-       								sh "sshpass -p \"${password}\" scp -o StrictHostKeyChecking=no ./prova.txt root@arredobimbo.com:/root"
+       								sh "sshpass -p \"${password}\" scp -o StrictHostKeyChecking=no ./prova2.txt root@arredobimbo.com:/root"
         
    								}
 								   
