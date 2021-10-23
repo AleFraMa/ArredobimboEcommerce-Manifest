@@ -94,8 +94,30 @@ pipeline {
 				}
 			}
 		}
+				stage('Deploy On server Alibaba') {
+								 when {
+            expression {
+                    return !params.testonlydeploy;
+                }
+        }
+			steps {
+				script {
+					dir ("app") {
+						
+							
+							 withCredentials([string(credentialsId: "password-ssh-arredobimbo-server", variable: 'password')]) {
 
-		stage('Deploy On server Alibaba') {
+       								sh "sshpass -p \"${password}\" scp -o StrictHostKeyChecking=no -r ./build/* root@arredobimbo.com:/usr/share/nginx/html"
+        
+   								}
+								   
+							//sh "sudo scp -i /root/Progetti/ArredoBimbo/chiave_privata_server_arredobimbo/key.pem -r ./build/* root@arredobimbo.com:/usr/share/nginx/html"
+					}	
+				}
+			}
+		}
+
+		stage('TEST ONLY DEPLOY') {
 								 when {
             expression {
                     return params.testonlydeploy;
@@ -104,15 +126,15 @@ pipeline {
 			steps {
 				script {
 					dir ("app") {
-							sh "ls"
-							sh "echo newprova >> prova2.txt"
+						
+							sh "echo prova>> prova.txt"
 							 withCredentials([string(credentialsId: "password-ssh-arredobimbo-server", variable: 'password')]) {
 
-       								sh "sshpass -p \"${password}\" scp -o StrictHostKeyChecking=no ./prova2.txt root@arredobimbo.com:/root"
+       								sh "sshpass -p \"${password}\" scp -o StrictHostKeyChecking=no ./prova.txt root@arredobimbo.com:/root"
         
    								}
 								   
-							//sh "sudo scp -i /root/Progetti/ArredoBimbo/chiave_privata_server_arredobimbo/key.pem -r ./build/* root@arredobimbo.com:/usr/share/nginx/html"
+							
 					}	
 				}
 			}
