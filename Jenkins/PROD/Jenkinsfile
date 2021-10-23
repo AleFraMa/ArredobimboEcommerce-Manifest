@@ -3,7 +3,7 @@ pipeline {
 	agent any
 	
 	parameters {
-        booleanParam(name: 'testonlydeploy', defaultValue: false, description: 'True if you want to execute unit tests')
+        booleanParam(name: 'testonlydeploy', defaultValue: false, description: 'True if you want test only deploy on service with test file')
 
     }
 	
