@@ -44,8 +44,9 @@ pipeline {
 			steps {
 				dir("app/ArredoBimboE-Commerce"){
 				script {
-					sh 'echo "export const IP = "https://arredobimbo.com:8443";" > ./src/configs/IPConfig.js'
-					sh "npm install"
+					sh "ls"
+					//sh 'echo "export const IP = "https://arredobimbo.com:8443";" > ./src/configs/IPConfig.js'
+					//sh "npm install"
 				}
 				}
 			}
@@ -55,7 +56,8 @@ pipeline {
 			steps {
 				dir("app/ArredoBimboE-Commerce") {
 					script {
-						sh "npm run build"
+						sh "echo build"
+						//sh "npm run build"
 					}
 				}
 			}
