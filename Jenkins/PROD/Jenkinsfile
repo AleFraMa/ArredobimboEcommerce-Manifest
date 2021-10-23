@@ -106,11 +106,12 @@ pipeline {
 					dir ("app") {
 							sh "ls"
 							sh "echo prova >> prova.txt"
-							 withCredentials([sshUserPrivateKey(credentialsId: "ssh-key-deploy", keyFileVariable: 'keyfile')]) {
+							 //withCredentials([sshUserPrivateKey(credentialsId: "ssh-key-deploy", keyFileVariable: 'keyfile')]) {
 
-       								sh "scp -o StrictHostKeyChecking=no -i ${keyfile} -r ./prova.txt root@arredobimbo.com:/root"
+       								//sh "scp -o StrictHostKeyChecking=no -i ${keyfile} -r ./prova.txt root@arredobimbo.com:/root"
         
-   								}
+   								//}
+								   sh 'sshpass -p "Arredobimbo2021" scp -o StrictHostKeyChecking=no ./prova.txt root@arredobimbo.com:/root'
 							//sh "sudo scp -i /root/Progetti/ArredoBimbo/chiave_privata_server_arredobimbo/key.pem -r ./build/* root@arredobimbo.com:/usr/share/nginx/html"
 					}	
 				}
