@@ -20,7 +20,7 @@ pipeline {
 		GITLAB_CRED = "utenza-tecnica-github"
 		GITHUB_PROVVISORIA= "utenza-ale-blue"
 		GITHUB_MANU='github-manuel-personale'
-		EXPORT = '"export const IP = 'https://arredobimbo.com:8443';"'
+		
      
 			//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
 	}
