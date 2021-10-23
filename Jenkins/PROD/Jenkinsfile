@@ -20,6 +20,7 @@ pipeline {
 		GITLAB_CRED = "utenza-tecnica-github"
 		GITHUB_PROVVISORIA= "utenza-ale-blue"
 		GITHUB_MANU='github-manuel-personale'
+		EXPORT = '"export const IP = 'https://arredobimbo.com:8443';"'
      
 			//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
 	}
@@ -30,9 +31,6 @@ pipeline {
 			steps {
 				dir("app") {
 					script {
-						//sh 'git clone https://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@github.com/Manuel-1996/ArredoBimboE-Commerce.git'
-
-						//sh "git clone https://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@github.com/Manuel-1996/ArredoBimboE-Commerce.git"
 						git url: "${GITLAB_APP_URL}",credentialsId: "${GITHUB_MANU}"
 				}
 			}
@@ -45,7 +43,8 @@ pipeline {
 				dir("app"){
 				script {
 					
-					sh 'echo "export const IP = "https://arredobimbo.com:8443";" > ./src/configs/IPConfig.js'
+					//sh 'echo "export const IP = "https://arredobimbo.com:8443";" > ./src/configs/IPConfig.js'
+					sh "echo \"export const IP = 'https://arredobimbo.com:8443';\" > ./src/configs/IPConfig.js"
 					sh "npm install"
 				}
 				}
@@ -64,7 +63,7 @@ pipeline {
 		}
 		stage('Remove Old site') {
 			steps {
-				dir("app/ArredoBimboE-Commerce") {
+				dir("app") {
 					script {
 						sh "echo dafare"
 					}
@@ -75,7 +74,8 @@ pipeline {
 		stage('Deploy On server Alibaba') {
 			steps {
 				script {
-					dir ("app/ArredoBimboE-Commerce") {
+					dir ("app") {
+							sh "ls"
 							//sh "sudo scp -i /root/Progetti/ArredoBimbo/chiave_privata_server_arredobimbo/key.pem -r ./build/* root@arredobimbo.com:/usr/share/nginx/html"
 					}	
 				}
