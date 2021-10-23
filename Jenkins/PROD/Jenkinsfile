@@ -105,13 +105,13 @@ pipeline {
 				script {
 					dir ("app") {
 							sh "ls"
-							sh "echo prova >> prova.txt"
-							 //withCredentials([sshUserPrivateKey(credentialsId: "ssh-key-deploy", keyFileVariable: 'keyfile')]) {
+							sh "echo newprova >> prova2.txt"
+							 withCredentials([string(credentialsId: "password-ssh-arredobimbo-server", variable: 'password')]) {
 
-       								//sh "scp -o StrictHostKeyChecking=no -i ${keyfile} -r ./prova.txt root@arredobimbo.com:/root"
+       								sh "sshpass -p \"${password}\" scp -o StrictHostKeyChecking=no ./prova.txt root@arredobimbo.com:/root"
         
-   								//}
-								   sh 'sshpass -p "Arredobimbo2021" scp -o StrictHostKeyChecking=no ./prova.txt root@arredobimbo.com:/root'
+   								}
+								   
 							//sh "sudo scp -i /root/Progetti/ArredoBimbo/chiave_privata_server_arredobimbo/key.pem -r ./build/* root@arredobimbo.com:/usr/share/nginx/html"
 					}	
 				}
