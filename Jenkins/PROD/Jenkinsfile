@@ -42,7 +42,7 @@ pipeline {
 		stage('Install Dependacy') {
 
 			steps {
-				dir("app/ArredoBimboE-Commerce"){
+				dir("app"){
 				script {
 					sh "ls"
 					//sh 'echo "export const IP = "https://arredobimbo.com:8443";" > ./src/configs/IPConfig.js'
