@@ -49,7 +49,7 @@ pipeline {
 					script {
 						sh "echo \"export const IP = 'https://arredobimbo.com:8443';\" > ./src/configs/IPConfig.js"
 						sh 'cat ./src/configs/IPConfig.js'
-						sh "npm install"
+						sh "npm install --force"
 					}
 				}
 			}
