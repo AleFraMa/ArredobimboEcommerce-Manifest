@@ -91,7 +91,7 @@ pipeline {
 		stage('Deploy On server Manuel') {
 			when {
            	 	expression {
-                    return !params.testonlydeploy;
+                    return params.testonlydeploy;
                 }
         	}
 			steps {
@@ -99,8 +99,9 @@ pipeline {
 					dir ("app") {
 
 							 withCredentials([string(credentialsId: "password-ssh-arredobimbo-server", variable: 'password')]) {
-
-       								sh "sudo cp -r ./build/* /usr/share/nginx/html/arredobimbo"
+								
+       								//sh "sudo cp -r ./build/* /usr/share/nginx/html/arredobimbo"
+								 sh "sudo cp -r yarn.lock /usr/share/nginx/html/arredobimbo"
         
    							}		
 					}	
