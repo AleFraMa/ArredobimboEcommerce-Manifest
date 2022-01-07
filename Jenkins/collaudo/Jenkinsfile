@@ -100,7 +100,7 @@ pipeline {
 
 							 withCredentials([string(credentialsId: "password-ssh-arredobimbo-server", variable: 'password')]) {
 
-       								sh "cp -r ./build/* /usr/share/nginx/html"
+       								sh "cp -r ./build/* /usr/share/nginx/html/arredobimbo"
         
    							}		
 					}	
