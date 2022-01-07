@@ -32,6 +32,7 @@ pipeline {
 						pkgJSON = readJSON file: 'package.json'
 						pkgJSON['homepage']="http:http://studio-manudaniel.ddns.net/arredobimbo"
 						writeJSON file: 'package.json', json: pkgJSON
+						sh "cat package.json"
 						
 				}
 			}
