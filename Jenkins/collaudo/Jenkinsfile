@@ -30,7 +30,7 @@ pipeline {
 					script {
 						git url: "${GITLAB_APP_URL}",credentialsId: "${GITHUB_MANU}"
 						pkgJSON = readJSON file: 'package.json'
-						pkgJSON['homepage']="http:http://studio-manudaniel.ddns.net/arredobimbo"
+						pkgJSON['homepage']="http://studio-manudaniel.ddns.net/arredobimbo"
 						writeJSON file: 'package.json', json: pkgJSON
 						sh "cat package.json"
 						
