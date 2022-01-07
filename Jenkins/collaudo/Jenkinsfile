@@ -91,7 +91,7 @@ pipeline {
 		stage('Deploy On server Manuel') {
 			when {
            	 	expression {
-                    return params.testonlydeploy;
+                    return !params.testonlydeploy;
                 }
         	}
 			steps {
