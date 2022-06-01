@@ -100,7 +100,7 @@ pipeline {
 
 							 withCredentials([string(credentialsId: "password-ssh-arredobimbo-server", variable: 'password')]) {
 
-       								sh "sshpass -p \"${password}\" scp -o StrictHostKeyChecking=no -r ./build/* root@arredobimbo.com:/usr/share/nginx/html"
+       								sh "scp -o StrictHostKeyChecking=no -i /etc/key/chiavepost.pem -r ./build/* root@arredobimbo.com:/usr/share/nginx/html"
         
    							}		
 					}	
