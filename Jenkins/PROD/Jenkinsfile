@@ -7,7 +7,7 @@ pipeline {
     }
 	
 	environment {
-		GITLAB_APP_URL = "https://github.com/Manuel-1996/ArredoBimboE-Commerce.git" 
+		GITLAB_APP_URL = "https://studio-manudaniel.ddns.net:9300/arredobimbo/codice-sorgente/ArredoBimboE-Commerce.git" 
 
 		GITLAB_CRED = "utenza-tecnica-github"
 		GITHUB_MANU='github-manuel-personale'
@@ -28,7 +28,8 @@ pipeline {
 			steps {
 				dir("app") {
 					script {
-						git url: "${GITLAB_APP_URL}",credentialsId: "${GITHUB_MANU}",branch: "${branch}"
+						//git url: "${GITLAB_APP_URL}",credentialsId: "${GITHUB_MANU}",branch: "${branch}"
+						git url: "${GITLAB_APP_URL}",branch: "master"
 				}
 			}
 			}
